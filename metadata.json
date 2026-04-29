@@ -1,5 +1,6 @@
 {
   "owner": "zizmorcore",
   "name": "zizmor-action",
-  "visibility": ""
+  "visibility": "internal",
+  "description": "Run zizmor from GitHub Actions!"
 }
