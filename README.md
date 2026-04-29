@@ -1,6 +1,12 @@
 # zizmorcore/zizmor-action
 
-Hardened GitHub Action by [Chainguard](https://www.chainguard.dev).
+Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/zizmorcore/zizmor-action](https://github.com/zizmorcore/zizmor-action).
+
+## Versions
+
+| Version | Tag | Upstream commit |
+|---------|-----|-----------------|
+| v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmor-action/tree/v0.5.2) | — |
 
 ## Privacy
 
