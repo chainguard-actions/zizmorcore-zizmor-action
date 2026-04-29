@@ -2,5 +2,6 @@
   "owner": "zizmorcore",
   "name": "zizmor-action",
   "visibility": "internal",
-  "description": "Run zizmor from GitHub Actions!"
+  "description": "Run zizmor from GitHub Actions!",
+  "block_publish": false
 }
