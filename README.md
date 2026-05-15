@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmor-action/tree/v0.5.2) | — |
+| v0.5.3 | [`v0.5.3`](https://github.com/chainguard-actions/zizmor-action/tree/v0.5.3) | — |
 
 ## Privacy
 
