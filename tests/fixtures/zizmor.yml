@@ -1,0 +1,4 @@
+# Minimal zizmor configuration for testing
+rules:
+  unpinned-uses:
+    ignore: []

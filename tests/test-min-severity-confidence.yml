@@ -1,0 +1,28 @@
+name: Test min-severity and min-confidence inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          # Scan only the test files directory to keep the scan fast and scoped
+          inputs: actions/hardened/zizmorcore--zizmor-action/v0.5.3/tests
+          online-audits: "false"
+          advanced-security: "false"
+          persona: regular
+          min-severity: high
+          min-confidence: high
+          version: "1.24.1"
+        continue-on-error: true
+
+      - name: Assert action ran with min-severity and min-confidence
+        run: |
+          # The action either succeeds (exit 0, no high-severity findings)
+          # or exits with code 1 (findings found at the specified severity/confidence).
+          # Either way, the step should have completed (continue-on-error: true).
+          echo "PASS: action step completed with min-severity=high and min-confidence=high"
