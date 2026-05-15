@@ -1,6 +1,6 @@
 # zizmorcore/zizmor-action
 
-Run zizmor from GitHub Actions!
+Run zizmor from GitHub Actions 🌈
 
 Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/zizmorcore/zizmor-action](https://github.com/zizmorcore/zizmor-action).
 
