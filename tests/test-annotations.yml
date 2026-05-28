@@ -1,4 +1,4 @@
-name: Test custom config input
+name: Test annotations mode
 on:
   workflow_dispatch:
 jobs:
@@ -12,12 +12,11 @@ jobs:
           inputs: "."
           online-audits: "false"
           advanced-security: "false"
-          annotations: "false"
+          annotations: "true"
           color: "false"
           version: "1.24.1"
-          config: "${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.3/tests/fixtures/zizmor.yml"
         continue-on-error: true
-      - name: Assert action ran with custom config
+      - name: Assert action ran in annotations mode
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -26,4 +25,4 @@ jobs:
             echo "FAIL: action was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action ran with custom config, outcome=$OUTCOME"
+          echo "PASS: action ran in annotations mode, outcome=$OUTCOME"

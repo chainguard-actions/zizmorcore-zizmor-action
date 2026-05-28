@@ -1,4 +1,4 @@
-name: Test custom config input
+name: Test min-severity and min-confidence inputs
 on:
   workflow_dispatch:
 jobs:
@@ -15,9 +15,10 @@ jobs:
           annotations: "false"
           color: "false"
           version: "1.24.1"
-          config: "${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.3/tests/fixtures/zizmor.yml"
+          min-severity: "high"
+          min-confidence: "high"
         continue-on-error: true
-      - name: Assert action ran with custom config
+      - name: Assert action ran with severity and confidence filters
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -26,4 +27,4 @@ jobs:
             echo "FAIL: action was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action ran with custom config, outcome=$OUTCOME"
+          echo "PASS: action ran with min-severity=high and min-confidence=high, outcome=$OUTCOME"
