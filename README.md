@@ -10,6 +10,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 |---------|-----|-----------------|
 | v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.2) | — |
 | v0.5.3 | [`v0.5.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.3) | [`b1d7e1f`](https://github.com/zizmorcore/zizmor-action/commit/b1d7e1fb5de872772f31590499237e7cce841e8e) |
+| v0.5.6 | [`v0.5.6`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.6) | [`5f14fd0`](https://github.com/zizmorcore/zizmor-action/commit/5f14fd08f7cf1cb1609c1e344975f152c7ee938d) |
 
 ## Privacy
 
