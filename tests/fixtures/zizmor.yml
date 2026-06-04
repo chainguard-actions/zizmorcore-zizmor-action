@@ -1,3 +1,5 @@
-# Minimal zizmor configuration for testing
+# zizmor configuration file for testing
 rules:
-  {}
+  unpinned-uses:
+    ignore:
+      - "actions/checkout"
