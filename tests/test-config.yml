@@ -1,0 +1,23 @@
+name: Test custom config input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          inputs: ${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.6/tests
+          online-audits: "false"
+          advanced-security: "false"
+          config: ${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.6/tests/fixtures/zizmor.yml
+          version: "1.25.2"
+          fail-on-no-inputs: "false"
+
+      - name: Assert action completed successfully with custom config
+        run: |
+          echo "Action completed with custom config file"
+          echo "PASS"
