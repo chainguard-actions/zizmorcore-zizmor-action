@@ -83,18 +83,20 @@ fi
 
 image="ghcr.io/zizmorcore/zizmor:${normalized_version}@${digest}"
 
+# Split the user-supplied inputs string into an array using read -ra so that
+# word-splitting is performed safely without exposing shell metacharacters.
+# This prevents injection of subshell expressions, semicolons, globs, etc.
+read -ra zizmor_inputs <<< "${GHA_ZIZMOR_INPUTS}"
+
 # Notes:
 # - We run the container with ${GITHUB_WORKSPACE} mounted as /workspace
 #   and with /workspace as the working directory, so that user inputs
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is intentionally not quoted, so that
-#   it can expand according to the shell's word-splitting rules.
-#   However, we put it after `--` so that it can't be interpreted
-#   as one or more flags.
-#
-# shellcheck disable=SC2086
+# - zizmor_inputs is an array populated via read -ra, so each element
+#   is quoted individually when passed to docker run, preventing shell
+#   metacharacter injection.
 docker run \
     --rm \
     --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
@@ -103,7 +105,7 @@ docker run \
     "${image}" \
     "${arguments[@]}" \
     -- \
-    ${GHA_ZIZMOR_INPUTS} \
+    "${zizmor_inputs[@]}" \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"

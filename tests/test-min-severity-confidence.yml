@@ -1,0 +1,25 @@
+name: Test min-severity and min-confidence inputs
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with min-severity and min-confidence
+        id: action
+        uses: .
+        with:
+          inputs: ${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.2/tests/fixtures/workflows
+          online-audits: "false"
+          advanced-security: "false"
+          min-severity: "medium"
+          min-confidence: "medium"
+          version: "1.23.1"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "zizmor action with min-severity=medium and min-confidence=medium completed"
+          echo "PASS"

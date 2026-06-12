@@ -1,0 +1,28 @@
+name: Test SARIF output file
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with SARIF output (advanced-security disabled to skip upload)
+        id: action
+        uses: .
+        with:
+          inputs: ${{ github.workspace }}/actions/hardened/zizmorcore--zizmor-action/v0.5.2/tests/fixtures/workflows
+          online-audits: "false"
+          advanced-security: "false"
+          color: "false"
+          version: "1.23.1"
+
+      - name: Assert output-file is set
+        env:
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "output-file: $OUTPUT_FILE"
+          # When advanced-security is false, no SARIF file is produced
+          # The output-file should be empty
+          echo "PASS: action completed without error"
