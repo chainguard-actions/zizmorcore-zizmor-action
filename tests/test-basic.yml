@@ -1,0 +1,32 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          # Disable advanced-security to avoid SARIF upload (needs GitHub API)
+          advanced-security: "false"
+          # Disable online audits to avoid network dependency
+          online-audits: "false"
+          # Use a specific known version
+          version: "1.26.1"
+          # Scan only the action's own workflow files to keep it fast
+          inputs: ".github"
+        continue-on-error: true
+      - name: Assert action ran (exit 0 or findings exit code)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
+          # It should NOT exit with an unexpected error code
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: action failed unexpectedly"
+            exit 1
+          fi
+          echo "PASS"
