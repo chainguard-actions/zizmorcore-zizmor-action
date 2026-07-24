@@ -1,0 +1,31 @@
+name: Test fail-on-no-inputs false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor on empty directory with fail-on-no-inputs=false (should succeed)
+        id: action-no-fail
+        uses: .
+        with:
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          inputs: "tests/fixtures/empty-dir"
+          version: "latest"
+          fail-on-no-inputs: "false"
+        continue-on-error: true
+
+      - name: Assert action succeeded (no inputs, but fail-on-no-inputs=false)
+        env:
+          OUTCOME: ${{ steps.action-no-fail.outcome }}
+        run: |
+          echo "Step outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "FAIL: expected action to succeed with fail-on-no-inputs=false, but it failed"
+            exit 1
+          fi
+          echo "PASS: action succeeded with fail-on-no-inputs=false"
