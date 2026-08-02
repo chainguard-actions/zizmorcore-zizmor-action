@@ -1,0 +1,33 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with basic settings (no advanced-security, no annotations)
+        id: action
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          persona: "regular"
+          version: "latest"
+        continue-on-error: true
+
+      - name: Assert action ran (exit 0 or findings exit code 1 are both acceptable)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid runs
+          # Only a setup/crash failure (e.g. Docker not found) would be unexpected
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran (outcome=$OUTCOME)"

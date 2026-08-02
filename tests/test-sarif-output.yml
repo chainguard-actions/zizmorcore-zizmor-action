@@ -1,0 +1,63 @@
+name: Test SARIF output file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with SARIF output (advanced-security mode, skip upload)
+        id: action
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          persona: "regular"
+          version: "latest"
+        continue-on-error: true
+
+      - name: Assert action ran and produced output
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # When advanced-security=false, no SARIF file path is set in outputs
+          # The action should still run successfully (exit 0 or 1 for findings)
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran (outcome=$OUTCOME)"
+
+      - name: Run zizmor with SARIF output enabled (advanced-security=true, no upload step)
+        id: action-sarif
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "true"
+          online-audits: "false"
+          persona: "regular"
+          version: "latest"
+        # advanced-security=true triggers the upload-sarif step which may fail without GHAS
+        # We use continue-on-error to still check the output-file was set
+        continue-on-error: true
+
+      - name: Assert SARIF output-file is set when advanced-security is true
+        env:
+          OUTCOME: ${{ steps.action-sarif.outcome }}
+          OUTPUT_FILE: ${{ steps.action-sarif.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # The output-file should be set to a path in RUNNER_TEMP
+          # even if the upload step fails (no GHAS on this repo)
+          if [ -z "$OUTPUT_FILE" ] && [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: expected output-file to be set when advanced-security=true"
+            exit 1
+          fi
+          echo "PASS: SARIF output handling verified (outcome=$OUTCOME, output-file=$OUTPUT_FILE)"

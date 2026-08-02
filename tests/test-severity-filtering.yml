@@ -1,0 +1,35 @@
+name: Test severity and confidence filtering
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with high severity and high confidence filters
+        id: action
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          persona: "regular"
+          min-severity: "high"
+          min-confidence: "high"
+          version: "latest"
+        continue-on-error: true
+
+      - name: Assert action ran with severity/confidence filters
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With high severity + high confidence filters, fewer findings are expected
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"

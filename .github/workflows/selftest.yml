@@ -1,0 +1,278 @@
+name: Self-test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  selftest:
+    name: "TEST: basic selftest"
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        with:
+          advanced-security: true
+
+  selftest-version:
+    name: "TEST: specific version of zizmor"
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        with:
+          advanced-security: true
+          version: "1.6.0"
+
+  selftest-version-nonexistent-xfail:
+    name: "TEST: nonexistent version of zizmor (expected to fail)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: true
+          version: "9999.0.0"
+
+      - name: assert failure
+        env:
+          XFAIL: ${{ steps.zizmor.outcome == 'failure' }}
+          JOB_NAME: ${{ github.job }}
+        run: |
+          echo "xfail ${JOB_NAME}: ${XFAIL}"
+
+          [[ "${XFAIL}" == "true" ]] || { >&2 echo "expected step to fail"; exit 1; }
+
+  selftest-plain:
+    name: "TEST: emits plan format when 'advanced-security: false'"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        with:
+          advanced-security: false
+
+  selftest-plain-gha-hazmat-xfail:
+    name: "TEST: known findings in woodruffw/gha-hazmat (expected to fail when 'advanced-security: false')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: false
+          inputs: "woodruffw/gha-hazmat"
+
+      - name: assert failure
+        env:
+          XFAIL: ${{ steps.zizmor.outcome == 'failure' }}
+          JOB_NAME: ${{ github.job }}
+        run: |
+          echo "xfail ${JOB_NAME}: ${XFAIL}"
+
+          [[ "${XFAIL}" == "true" ]] || { >&2 echo "expected step to fail"; exit 1; }
+
+  selftest-plain-gha-hazmat-offline-audits-xfail:
+    name: "TEST: known findings in woodruffw/gha-hazmat with offline audits (expected to fail when 'advanced-security: false')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: false
+          inputs: "woodruffw/gha-hazmat"
+          online-audits: false
+
+      - name: assert failure
+        env:
+          XFAIL: ${{ steps.zizmor.outcome == 'failure' }}
+          JOB_NAME: ${{ github.job }}
+        run: |
+          echo "xfail ${JOB_NAME}: ${XFAIL}"
+
+          [[ "${XFAIL}" == "true" ]] || { >&2 echo "expected step to fail"; exit 1; }
+
+  selftest-annotations:
+    name: "TEST: 'annotations: true' emits GitHub annotations"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        with:
+          advanced-security: false
+          annotations: true
+
+  selftest-annotations-advanced-security-exclusive-xfail:
+    name: "TEST: 'annotations: true' and 'advanced-security: true' are mutually exclusive"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: true
+          annotations: true
+
+      - name: assert failure
+        env:
+          XFAIL: ${{ steps.zizmor.outcome == 'failure' }}
+          JOB_NAME: ${{ github.job }}
+        run: |
+          echo "xfail ${JOB_NAME}: ${XFAIL}"
+
+          [[ "${XFAIL}" == "true" ]] || { >&2 echo "expected step to fail"; exit 1; }
+
+  selftest-fail-on-no-inputs-xfail:
+    name: "TEST: 'fail-on-no-inputs: true' causes failure when no inputs are collected"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: false
+          inputs: woodruffw-experiments/empty
+
+      - name: assert failure
+        env:
+          XFAIL: ${{ steps.zizmor.outcome == 'failure' }}
+          JOB_NAME: ${{ github.job }}
+        run: |
+          echo "xfail ${JOB_NAME}: ${XFAIL}"
+
+          [[ "${XFAIL}" == "true" ]] || { >&2 echo "expected step to fail"; exit 1; }
+
+  selftest-fail-on-no-inputs-disabled:
+    name: "TEST: 'fail-on-no-inputs: false' does not cause failure when no inputs are collected"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        continue-on-error: true
+        with:
+          advanced-security: false
+          inputs: woodruffw-experiments/empty
+          fail-on-no-inputs: false
+
+  selftest-output-file-output-is-present-when-advanced-security:
+    name: "TEST: 'outputs.output-file' is present when `advanced-security: true`"
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        with:
+          advanced-security: true
+
+      - name: Test output-file
+        run: |
+          jq < "${OUTPUT_FILE}"
+        env:
+          OUTPUT_FILE: ${{ steps.zizmor.outputs.output-file }}
+
+  selftest-collect:
+    name: "TEST: 'collect: actions` only collections action inputs"
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: zizmor
+        with:
+          advanced-security: false
+          collect: actions
+
+      # TODO: Would be nice to grep the input or similar here to confirm we only collected `./action.yml`.
+
+  all-selftests-pass:
+    if: always()
+
+    needs:
+      - selftest
+      - selftest-version
+      - selftest-version-nonexistent-xfail
+      - selftest-plain
+      - selftest-plain-gha-hazmat-xfail
+      - selftest-plain-gha-hazmat-offline-audits-xfail
+      - selftest-annotations
+      - selftest-annotations-advanced-security-exclusive-xfail
+      - selftest-fail-on-no-inputs-xfail
+      - selftest-fail-on-no-inputs-disabled
+      - selftest-output-file-output-is-present-when-advanced-security
+      - selftest-collect
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check test jobs
+        if: (github.event_name != 'pull_request') || !github.event.pull_request.head.repo.fork
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}

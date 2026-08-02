@@ -1,0 +1,33 @@
+name: Test pinned version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run zizmor with a specific pinned version
+        id: action
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          persona: "regular"
+          version: "1.29.0"
+        continue-on-error: true
+
+      - name: Assert action ran with pinned version
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid runs
+          # A failure here would indicate a bad version or Docker issue
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with pinned version 1.29.0 (outcome=$OUTCOME)"

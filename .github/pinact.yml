@@ -1,0 +1,4 @@
+version: 3
+
+files:
+  - pattern: ../README.md
