@@ -1,4 +1,4 @@
-name: Test min-severity and min-confidence filters
+name: Test mutually exclusive options error
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install mock docker
+      - name: Install mock docker (should not be called due to early exit)
         run: |
           mkdir -p "$HOME/.local/bin"
           cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-success.sh" "$HOME/.local/bin/docker"
@@ -15,20 +15,19 @@ jobs:
       - id: action
         uses: .
         with:
-          advanced-security: "false"
+          advanced-security: "true"
+          annotations: "true"
           online-audits: "false"
-          min-severity: "high"
-          min-confidence: "high"
           inputs: "."
           version: "1.24.1"
         continue-on-error: true
-      - name: Assert action ran with severity and confidence filters
+      - name: Assert action failed due to mutually exclusive options
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "skipped" ]; then
-            echo "FAIL: action was skipped unexpectedly"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail when both advanced-security and annotations are true, got: $OUTCOME"
             exit 1
           fi
-          echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+          echo "PASS: action correctly failed for mutually exclusive options"

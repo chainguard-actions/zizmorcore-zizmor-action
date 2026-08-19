@@ -1,4 +1,4 @@
-name: Test min-severity and min-confidence filters
+name: Test offline audits with annotations
 on:
   workflow_dispatch:
 jobs:
@@ -16,13 +16,12 @@ jobs:
         uses: .
         with:
           advanced-security: "false"
+          annotations: "true"
           online-audits: "false"
-          min-severity: "high"
-          min-confidence: "high"
           inputs: "."
           version: "1.24.1"
         continue-on-error: true
-      - name: Assert action ran with severity and confidence filters
+      - name: Assert action ran with annotations mode
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -31,4 +30,4 @@ jobs:
             echo "FAIL: action was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+          echo "PASS: action ran in annotations mode (outcome=$OUTCOME)"

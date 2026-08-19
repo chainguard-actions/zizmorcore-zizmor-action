@@ -6,17 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install mock docker
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-success.sh" "$HOME/.local/bin/docker"
+          chmod +x "$HOME/.local/bin/docker"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - id: action
         uses: .
         with:
-          inputs: "."
-          online-audits: "false"
           advanced-security: "false"
-          annotations: "false"
-          color: "false"
+          online-audits: "false"
+          inputs: "."
           version: "1.24.1"
         continue-on-error: true
-      - name: Assert action ran (output-file set or action completed)
+      - name: Assert action ran
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -25,4 +29,4 @@ jobs:
             echo "FAIL: action was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action ran with outcome=$OUTCOME"
+          echo "PASS: action ran (outcome=$OUTCOME)"

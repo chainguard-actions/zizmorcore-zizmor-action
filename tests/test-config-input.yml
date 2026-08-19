@@ -1,4 +1,4 @@
-name: Test min-severity and min-confidence filters
+name: Test config input
 on:
   workflow_dispatch:
 jobs:
@@ -6,29 +6,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install mock docker
+      - name: Install mock docker that checks for --config flag
         run: |
           mkdir -p "$HOME/.local/bin"
-          cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-success.sh" "$HOME/.local/bin/docker"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-config-check.sh" "$HOME/.local/bin/docker"
           chmod +x "$HOME/.local/bin/docker"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - id: action
         uses: .
         with:
+          config: "${{ github.workspace }}/tests/fixtures/zizmor.yml"
           advanced-security: "false"
           online-audits: "false"
-          min-severity: "high"
-          min-confidence: "high"
           inputs: "."
           version: "1.24.1"
-        continue-on-error: true
-      - name: Assert action ran with severity and confidence filters
+      - name: Assert action ran successfully with config input
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "skipped" ]; then
-            echo "FAIL: action was skipped unexpectedly"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed when config input is provided, got: $OUTCOME"
             exit 1
           fi
-          echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+          echo "PASS: action ran successfully with config input"

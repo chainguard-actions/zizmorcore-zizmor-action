@@ -1,4 +1,4 @@
-name: Test min-severity and min-confidence filters
+name: Test pedantic persona
 on:
   workflow_dispatch:
 jobs:
@@ -15,14 +15,13 @@ jobs:
       - id: action
         uses: .
         with:
+          persona: "pedantic"
           advanced-security: "false"
           online-audits: "false"
-          min-severity: "high"
-          min-confidence: "high"
           inputs: "."
           version: "1.24.1"
         continue-on-error: true
-      - name: Assert action ran with severity and confidence filters
+      - name: Assert action ran with pedantic persona
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -31,4 +30,4 @@ jobs:
             echo "FAIL: action was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+          echo "PASS: action ran with pedantic persona (outcome=$OUTCOME)"
