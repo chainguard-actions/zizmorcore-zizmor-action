@@ -1,0 +1,31 @@
+name: Test mutually exclusive options error
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          inputs: "."
+          advanced-security: "true"
+          annotations: "true"
+          online-audits: "false"
+          version: "latest"
+          token: ${{ github.token }}
+      - name: Assert action failed due to mutually exclusive options
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # When both advanced-security=true and annotations=true are set,
+          # the action.sh script should die with an error message.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed when both advanced-security and annotations are enabled"
+          else
+            echo "FAIL: expected failure for mutually exclusive options, got '$OUTCOME'"
+            exit 1
+          fi
