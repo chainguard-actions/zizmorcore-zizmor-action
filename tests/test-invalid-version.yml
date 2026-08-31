@@ -1,0 +1,30 @@
+name: Test invalid version error
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Passing an invalid version string should fail
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          version: "not-a-version"
+          inputs: "."
+
+      - name: Assert action failed due to invalid version
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed with invalid version string"
+          else
+            echo "FAIL: expected action to fail with invalid version, got '$OUTCOME'"
+            exit 1
+          fi

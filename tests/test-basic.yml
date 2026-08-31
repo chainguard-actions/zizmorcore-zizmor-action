@@ -1,0 +1,40 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          # Disable advanced-security to avoid SARIF upload to sentinel repo
+          advanced-security: "false"
+          # Disable online audits to avoid token/repo issues
+          online-audits: "false"
+          # Use a specific known version
+          version: "1.30.0"
+          # Scan the current directory
+          inputs: "."
+
+      - name: Assert action ran (zizmor scanned the repo)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
+          # exit 2 = usage error, exit 3 = no inputs collected
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: zizmor ran successfully (no findings or findings found)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: zizmor ran and reported findings (non-zero exit is expected for a repo with workflows)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS"

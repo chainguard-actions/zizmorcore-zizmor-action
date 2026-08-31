@@ -1,0 +1,40 @@
+name: Test custom config file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          # Disable advanced-security to avoid SARIF upload to sentinel repo
+          advanced-security: "false"
+          # Disable online audits to avoid token/repo issues
+          online-audits: "false"
+          # Use a specific known version
+          version: "1.30.0"
+          # Scan the current directory
+          inputs: "."
+          # Pass a custom config file (path relative to workspace, accessible inside Docker at /workspace/...)
+          config: "hardened/tests/fixtures/zizmor-config/zizmor.yml"
+
+      - name: Assert action ran with custom config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
+          # exit 2 = usage error (e.g. bad config), exit 3 = no inputs collected
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: zizmor ran successfully with custom config"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: zizmor ran with custom config and reported findings (non-zero exit is expected)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS"

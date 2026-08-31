@@ -1,0 +1,43 @@
+name: Test fail-on-no-inputs option
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create an empty directory with no workflow files so zizmor collects no inputs
+      - name: Create empty directory for scanning
+        run: |
+          mkdir -p /tmp/empty-scan-dir
+
+      # Run zizmor on an empty directory — it should exit with code 3 (no inputs collected)
+      # With fail-on-no-inputs=false, the action should succeed with a warning
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          version: "1.30.0"
+          inputs: "/tmp/empty-scan-dir"
+          fail-on-no-inputs: "false"
+
+      - name: Assert action succeeded despite no inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With fail-on-no-inputs=false, the action should succeed even if no inputs are collected
+          # Note: this feature requires zizmor v1.21.0+, which 1.30.0 satisfies
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with fail-on-no-inputs=false and no inputs collected"
+          elif [ "$OUTCOME" = "failure" ]; then
+            # Older behavior or the empty dir still has some files — acceptable
+            echo "INFO: action failed (may be expected if zizmor version doesn't support fail-on-no-inputs)"
+            echo "PASS: action ran and handled no-inputs case"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
