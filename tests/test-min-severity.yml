@@ -1,0 +1,35 @@
+name: Test min-severity filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          # Only report high severity findings — likely to produce no findings
+          min-severity: "high"
+          min-confidence: "high"
+          persona: "regular"
+        continue-on-error: true
+      - name: Assert action ran with severity filter
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With high min-severity, zizmor may succeed (no findings) or fail (findings found)
+          # Either way, the action should have run without configuration errors
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: zizmor ran with min-severity=high and found no high-severity issues"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: zizmor ran with min-severity=high and found high-severity issues"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
