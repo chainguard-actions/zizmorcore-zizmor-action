@@ -89,11 +89,15 @@ image="ghcr.io/zizmorcore/zizmor:${normalized_version}@${digest}"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is parsed into an array via `read -ra` so that
-#   word-splitting is performed safely without exposing shell metacharacters
-#   to interpretation. The array is then expanded quoted as "${inputs_array[@]}".
-#   We put the inputs after `--` so that they can't be interpreted as flags.
-read -ra inputs_array <<< "${GHA_ZIZMOR_INPUTS}"
+# - ${GHA_ZIZMOR_INPUTS} is a whitespace-separated list of inputs; we
+#   tokenize it with xargs (which honors quotes) into an array so that
+#   each token is a separate, properly-quoted argument and shell glob
+#   expansion / metacharacter injection cannot occur.
+inputs=()
+if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
+    while IFS= read -r -d '' t; do inputs+=("${t}"); done \
+        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
+fi
 
 docker run \
     --rm \
@@ -103,7 +107,7 @@ docker run \
     "${image}" \
     "${arguments[@]}" \
     -- \
-    "${inputs_array[@]}" \
+    "${inputs[@]}" \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"

@@ -1,4 +1,4 @@
-name: Test zizmor min-severity and min-confidence filtering
+name: Test zizmor pedantic persona
 on:
   workflow_dispatch:
 jobs:
@@ -14,22 +14,19 @@ jobs:
           inputs: "."
           advanced-security: "false"
           online-audits: "false"
-          persona: "regular"
-          min-severity: "high"
-          min-confidence: "high"
+          persona: "pedantic"
           version: "latest"
           token: ${{ github.token }}
 
-      - name: Assert action ran with severity/confidence filters
+      - name: Assert action ran with pedantic persona
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # With high severity and high confidence filters, zizmor should
-          # either find no findings (exit 0) or find some (exit 1)
-          # Both are valid outcomes — we just verify the action ran
+          # Pedantic persona is stricter and may find more issues
+          # Both success (no findings) and failure (findings found) are valid
           if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+            echo "PASS: action ran with pedantic persona (outcome=$OUTCOME)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

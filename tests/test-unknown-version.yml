@@ -1,4 +1,4 @@
-name: Test basic zizmor scan
+name: Test zizmor unknown version error
 on:
   workflow_dispatch:
 jobs:
@@ -14,20 +14,19 @@ jobs:
           inputs: "."
           advanced-security: "false"
           online-audits: "false"
-          persona: "regular"
-          version: "latest"
+          version: "0.0.1"
           token: ${{ github.token }}
 
-      - name: Assert action ran (succeeded or failed gracefully with findings)
+      - name: Assert action failed on unknown version
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
-          # It should NOT exit with an unexpected error code
-          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran and completed (outcome=$OUTCOME)"
+          # The action should fail because version 0.0.1 is not in the
+          # supported versions list (support/versions file)
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed on unknown version"
           else
-            echo "FAIL: unexpected outcome '$OUTCOME'"
+            echo "FAIL: expected failure but got '$OUTCOME'"
             exit 1
           fi

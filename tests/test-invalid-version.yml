@@ -1,4 +1,4 @@
-name: Test basic zizmor scan
+name: Test zizmor invalid version error
 on:
   workflow_dispatch:
 jobs:
@@ -14,20 +14,19 @@ jobs:
           inputs: "."
           advanced-security: "false"
           online-audits: "false"
-          persona: "regular"
-          version: "latest"
+          version: "not-a-valid-version"
           token: ${{ github.token }}
 
-      - name: Assert action ran (succeeded or failed gracefully with findings)
+      - name: Assert action failed on invalid version
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
-          # It should NOT exit with an unexpected error code
-          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran and completed (outcome=$OUTCOME)"
+          # The action should fail because "not-a-valid-version" is not
+          # 'latest' or an exact X.Y.Z version string
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed on invalid version string"
           else
-            echo "FAIL: unexpected outcome '$OUTCOME'"
+            echo "FAIL: expected failure but got '$OUTCOME'"
             exit 1
           fi

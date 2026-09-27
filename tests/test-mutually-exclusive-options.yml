@@ -1,4 +1,4 @@
-name: Test basic zizmor scan
+name: Test zizmor mutually exclusive options error
 on:
   workflow_dispatch:
 jobs:
@@ -12,22 +12,22 @@ jobs:
         continue-on-error: true
         with:
           inputs: "."
-          advanced-security: "false"
+          advanced-security: "true"
+          annotations: "true"
           online-audits: "false"
-          persona: "regular"
           version: "latest"
           token: ${{ github.token }}
 
-      - name: Assert action ran (succeeded or failed gracefully with findings)
+      - name: Assert action failed due to mutually exclusive options
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
-          # It should NOT exit with an unexpected error code
-          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran and completed (outcome=$OUTCOME)"
+          # The action should fail because advanced-security and annotations
+          # are mutually exclusive options
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed on mutually exclusive options"
           else
-            echo "FAIL: unexpected outcome '$OUTCOME'"
+            echo "FAIL: expected failure but got '$OUTCOME'"
             exit 1
           fi

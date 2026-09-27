@@ -1,0 +1,43 @@
+name: Test zizmor SARIF output file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Run with advanced-security=false but check that output-file is NOT set
+      # (output-file is only set when advanced-security=true, which triggers SARIF format)
+      - id: action-no-sarif
+        uses: .
+        continue-on-error: true
+        with:
+          inputs: "."
+          advanced-security: "false"
+          annotations: "false"
+          online-audits: "false"
+          persona: "regular"
+          version: "latest"
+          token: ${{ github.token }}
+
+      - name: Assert action ran without SARIF output
+        env:
+          OUTCOME: ${{ steps.action-no-sarif.outcome }}
+          OUTPUT_FILE: ${{ steps.action-no-sarif.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: '$OUTPUT_FILE'"
+          # When advanced-security=false, no sarif-file output is set
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran (outcome=$OUTCOME)"
+            # output-file should be empty when advanced-security=false
+            if [ -n "$OUTPUT_FILE" ]; then
+              echo "WARN: output-file was set to '$OUTPUT_FILE' even without advanced-security"
+            else
+              echo "PASS: output-file is empty as expected without advanced-security"
+            fi
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

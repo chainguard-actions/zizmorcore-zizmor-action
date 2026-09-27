@@ -1,4 +1,4 @@
-name: Test zizmor min-severity and min-confidence filtering
+name: Test custom config file
 on:
   workflow_dispatch:
 jobs:
@@ -6,6 +6,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a custom zizmor config file
+        run: |
+          cat > "$GITHUB_WORKSPACE/zizmor-test.yml" <<'EOF'
+          rules:
+            unpinned-uses:
+              ignore: []
+          EOF
 
       - id: action
         uses: .
@@ -15,21 +23,19 @@ jobs:
           advanced-security: "false"
           online-audits: "false"
           persona: "regular"
-          min-severity: "high"
-          min-confidence: "high"
           version: "latest"
           token: ${{ github.token }}
+          config: "zizmor-test.yml"
 
-      - name: Assert action ran with severity/confidence filters
+      - name: Assert action ran with custom config (succeeded or failed gracefully with findings)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # With high severity and high confidence filters, zizmor should
-          # either find no findings (exit 0) or find some (exit 1)
-          # Both are valid outcomes — we just verify the action ran
+          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
+          # It should NOT exit with an unexpected error code
           if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran with severity/confidence filters (outcome=$OUTCOME)"
+            echo "PASS: action ran with custom config and completed (outcome=$OUTCOME)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1
