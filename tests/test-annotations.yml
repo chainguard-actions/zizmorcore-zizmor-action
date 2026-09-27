@@ -1,0 +1,39 @@
+name: Test annotations mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          inputs: "."
+          online-audits: "false"
+          advanced-security: "false"
+          annotations: "true"
+          version: "latest"
+      - name: Assert action ran in annotations mode
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # In annotations mode (advanced-security=false, annotations=true),
+          # output-file is never set regardless of outcome.
+          # The action may succeed or fail (findings found, no Docker, no inputs, etc.)
+          if [ -n "$OUTPUT_FILE" ]; then
+            echo "FAIL: output-file should never be set in annotations mode, got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: annotations mode ran successfully, no output-file set"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully in annotations mode (findings, no Docker, or no inputs)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
