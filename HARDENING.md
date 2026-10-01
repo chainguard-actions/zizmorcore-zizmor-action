@@ -16,11 +16,11 @@ Action **zizmorcore--zizmor-action/v0.5.3** was hardened automatically. 1 findin
 
 ### script-injection (severity: high)
 
-Rule (b) violation: The shell variable `${GHA_ZIZMOR_INPUTS}` — sourced from `inputs.inputs`, a user-controlled value — is intentionally left unquoted in the `docker run` command in `action.sh`. While the value is placed after `--` to prevent flag injection, the unquoted expansion still allows the shell to interpret metacharacters (e.g., `$(...)`, backticks, `;`, `|`, `&`) before passing arguments to `docker run`. The offending line is: `    ${GHA_ZIZMOR_INPUTS} \`. This should be quoted or sanitized to prevent shell metacharacter injection.
+Rule (b) violation: `${GHA_ZIZMOR_INPUTS}` is intentionally left unquoted in the `docker run` command in action.sh (line ~97). This variable holds the value of `inputs.inputs`, which is a user-controlled input passed via the `GHA_ZIZMOR_INPUTS` env var. The unquoted expansion allows the shell to perform word-splitting and glob expansion on the attacker-controlled value. Although the value is placed after `--` (preventing flag injection into docker), the unquoted shell variable expansion of untrusted data is still a script-injection risk per rule (b). The fix is to use a proper array or quoted expansion: `"${GHA_ZIZMOR_INPUTS}"` or pass inputs as an array.
 
 Locations:
 
-- `action.sh:87`
+- `action.sh:97`
 
 ## Iteration Notes
 
@@ -30,5 +30,5 @@ Locations:
 
 **Notes:**
 
-Fixed script injection vulnerability in action.sh at line 87. Replaced the unquoted `${GHA_ZIZMOR_INPUTS}` expansion (which allowed shell metacharacter injection via `$(...)`, backticks, `;`, `|`, `&`) with a safe two-step approach: (1) `read -ra zizmor_inputs <<< "${GHA_ZIZMOR_INPUTS}"` to split the value into an array using IFS word-splitting only (no metacharacter interpretation), then (2) `"${zizmor_inputs[@]}"` to expand the array with proper quoting. This preserves the intended whitespace-splitting behavior while preventing shell metacharacter injection. The now-unnecessary `# shellcheck disable=SC2086` comment was also removed.
+Replaced the unquoted `${GHA_ZIZMOR_INPUTS}` expansion in action.sh (line ~97) with a proper xargs-based tokenization into a bash array (`zizmor_inputs`). The fix uses `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` piped through a NUL-delimited `while IFS= read -r -d '' t` loop to safely tokenize the whitespace-separated list input with quote-awareness. The array is then expanded as `"${zizmor_inputs[@]}"` in the docker run command, ensuring each token is a separate properly-quoted argument. A guard `if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]` prevents xargs from emitting an empty argument when the input is empty.
 
