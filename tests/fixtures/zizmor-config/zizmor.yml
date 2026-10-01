@@ -1,0 +1,41 @@
+# Minimal zizmor configuration file for testing the config input
+rules:
+  # Disable all rules to ensure a clean scan (no findings)
+  artipacked:
+    ignore: true
+  excessive-permissions:
+    ignore: true
+  unpinned-uses:
+    ignore: true
+  ref-confusion:
+    ignore: true
+  template-injection:
+    ignore: true
+  dangerous-triggers:
+    ignore: true
+  known-vulnerable-actions:
+    ignore: true
+  use-trusted-publishing:
+    ignore: true
+  self-hosted-runner:
+    ignore: true
+  impostor-commit:
+    ignore: true
+  github-env:
+    ignore: true
+  unsound-contains:
+    ignore: true
+  overprovisioned-secrets:
+    ignore: true
+  hardcoded-container-credentials:
+    ignore: true
+  cache-poisoning:
+    ignore: true
+  forbidden-uses:
+    ignore: true
+  pull-request-target:
+    ignore: true
+  bot-conditions:
+    ignore: true
+  unredacted-secrets:
+    ignore: true

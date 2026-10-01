@@ -1,4 +1,4 @@
-name: Test custom config file
+name: Test zizmor with custom config file
 on:
   workflow_dispatch:
 jobs:
@@ -6,14 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Create a custom zizmor config file
-        run: |
-          cat > "$GITHUB_WORKSPACE/zizmor-test.yml" <<'EOF'
-          rules:
-            unpinned-uses:
-              ignore: []
-          EOF
 
       - id: action
         uses: .
@@ -25,17 +17,17 @@ jobs:
           persona: "regular"
           version: "latest"
           token: ${{ github.token }}
-          config: "zizmor-test.yml"
+          config: "${{ github.workspace }}/hardened/tests/fixtures/zizmor-config/zizmor.yml"
 
-      - name: Assert action ran with custom config (succeeded or failed gracefully with findings)
+      - name: Assert action ran with config input (succeeded or failed gracefully)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
           # zizmor exits 0 (no findings) or 1 (findings found) — both are valid
-          # It should NOT exit with an unexpected error code
+          # It should NOT exit with an unexpected error code unrelated to findings
           if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action ran with custom config and completed (outcome=$OUTCOME)"
+            echo "PASS: action ran with config input and completed (outcome=$OUTCOME)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1
