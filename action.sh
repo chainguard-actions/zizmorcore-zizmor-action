@@ -95,9 +95,9 @@ echo "::endgroup::"
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
 # - ${GHA_ZIZMOR_INPUTS} is a whitespace-separated list of inputs.
-#   We tokenize it with xargs (which honors quotes) into an array so
-#   that each token is passed as a separate argument without allowing
-#   shell metacharacter injection.
+#   We tokenize it with xargs (quote-aware) into an array so that
+#   shell metacharacters in the value cannot be interpreted by the shell.
+
 zizmor_inputs=()
 if [ -n "${GHA_ZIZMOR_INPUTS}" ]; then
     while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \

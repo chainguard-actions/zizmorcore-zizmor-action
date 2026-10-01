@@ -1,4 +1,4 @@
-name: Test custom config file
+name: Test config input
 on:
   workflow_dispatch:
 jobs:
@@ -19,8 +19,8 @@ jobs:
           version: "1.30.0"
           # Scan the current directory
           inputs: "."
-          # Pass a custom config file (path relative to workspace, accessible inside Docker at /workspace/...)
-          config: "hardened/tests/fixtures/zizmor-config/zizmor.yml"
+          # Pass a custom config file — this is the input under test
+          config: "${{ github.workspace }}/hardened/tests/fixtures/zizmor-config/zizmor.yml"
 
       - name: Assert action ran with custom config
         env:
