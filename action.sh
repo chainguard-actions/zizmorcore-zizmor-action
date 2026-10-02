@@ -89,15 +89,15 @@ image="ghcr.io/zizmorcore/zizmor:${normalized_version}@${digest}"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - zizmor_inputs is a properly tokenized array built from GHA_ZIZMOR_INPUTS
-#   using xargs so that quoted arguments are handled correctly (e.g.
-#   'sh -c "exit 0"') without allowing shell metacharacter injection via
-#   word-splitting or glob expansion. It is placed after `--` so that
-#   entries cannot be interpreted as flags.
+# - ${GHA_ZIZMOR_INPUTS} is tokenized with xargs to honor shell quoting
+#   rules (single/double quotes and backslashes) without evaluating any
+#   shell metacharacters (;, |, &, $(...), etc.), preventing injection.
+
 zizmor_inputs=()
 if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
-    while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \
-        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
+    while IFS= read -r -d '' t; do
+        zizmor_inputs+=("${t}")
+    done < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
 fi
 
 docker run \
