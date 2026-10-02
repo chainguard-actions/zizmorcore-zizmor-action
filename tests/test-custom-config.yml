@@ -12,12 +12,12 @@ jobs:
         uses: .
         with:
           inputs: "."
-          config: "hardened/tests/fixtures/zizmor.yml"
           advanced-security: "false"
           annotations: "false"
           online-audits: "false"
           persona: "regular"
           version: "latest"
+          config: "${{ github.workspace }}/hardened/tests/fixtures/zizmor-config/zizmor.yml"
         continue-on-error: true
 
       - name: Assert action ran with custom config (not skipped)
@@ -26,7 +26,7 @@ jobs:
         run: |
           echo "outcome: $OUTCOME"
           # zizmor exits 0 (no findings) or 1 (findings found) — both are valid runs
-          # Only a setup/crash failure (e.g. Docker not found, bad config path) would be unexpected
+          # A skipped outcome would indicate the action was never invoked
           if [ "$OUTCOME" = "skipped" ]; then
             echo "FAIL: action was skipped unexpectedly"
             exit 1

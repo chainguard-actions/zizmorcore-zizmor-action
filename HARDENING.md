@@ -16,12 +16,11 @@ Action **zizmorcore--zizmor-action/v0.6.2** was hardened automatically. 1 findin
 
 ### script-injection (severity: high)
 
-Rule (b) violation: In action.sh, the variable `${GHA_ZIZMOR_INPUTS}` — which holds the value of `inputs.inputs` from the calling workflow (set via `GHA_ZIZMOR_INPUTS: ${{ inputs.inputs }}` in action.yml's env: block) — is intentionally unquoted in the `docker run` command: `${GHA_ZIZMOR_INPUTS} \ | tee "${output}"`. While the value is placed after `--` to prevent flag injection, the unquoted shell expansion still allows shell metacharacters (`;`, `|`, `&`, `$(...)`, backticks, glob characters, whitespace splitting) to be interpreted by the shell, enabling command injection from a caller-controlled input.
+Rule (b) violation: The env var `GHA_ZIZMOR_INPUTS` holds the value of `${{ inputs.inputs }}` (attacker-controlled), and is expanded **unquoted** in the `docker run` command in `action.sh` (`${GHA_ZIZMOR_INPUTS}` without double-quotes). Although it is placed after `--` to prevent flag injection into Docker, the unquoted expansion still allows the shell to perform word-splitting and glob expansion on attacker-supplied data before passing arguments to the container. The offending line is: `    ${GHA_ZIZMOR_INPUTS} \`. The fix is to quote it: `"${GHA_ZIZMOR_INPUTS}"` (or use an array if multi-word splitting is intentional and safe).
 
 Locations:
 
-- `action.sh:89`
-- `action.yml:95`
+- `action.sh:88`
 
 ## Iteration Notes
 
@@ -31,5 +30,5 @@ Locations:
 
 **Notes:**
 
-Fixed script injection vulnerability in action.sh at line 89. The unquoted `${GHA_ZIZMOR_INPUTS}` expansion in the `docker run` command was replaced with a safe array-based approach: `read -ra zizmor_inputs <<< "${GHA_ZIZMOR_INPUTS}"` splits the input on whitespace (IFS) into an array without interpreting shell metacharacters, and `"${zizmor_inputs[@]}"` passes each element as a separate quoted argument. This preserves the intended word-splitting behavior for multiple paths while preventing command injection via shell metacharacters (;, |, &, $(...), backticks, globs). No changes were needed to action.yml since the env: block already correctly isolates the ${{ inputs.inputs }} expression from the shell.
+Fixed the unquoted `${GHA_ZIZMOR_INPUTS}` expansion in action.sh (line 88). Replaced the unquoted variable expansion (which allowed word-splitting and glob expansion on attacker-controlled data) with a properly tokenized bash array using the xargs-based approach: tokenize the whitespace-separated list with `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` into a NUL-delimited stream, read into a `zizmor_inputs` array with a `while IFS= read -r -d '' t` loop, then expand as `"${zizmor_inputs[@]}"` in the docker run command. Added a guard `[[ -n "${GHA_ZIZMOR_INPUTS}" ]]` to prevent xargs from emitting an empty token when the input is empty. Removed the `# shellcheck disable=SC2086` comment that was suppressing the shellcheck warning about the unquoted expansion.
 
