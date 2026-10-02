@@ -94,14 +94,14 @@ echo "::endgroup::"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is split into an array using read -ra so that
-#   multiple whitespace-separated paths are handled correctly, while
-#   shell metacharacters are not interpreted. The array is then expanded
-#   with proper quoting to prevent injection.
-
-# Split the user-supplied inputs string into an array using shell word-splitting
-# rules (IFS), but without evaluating any shell metacharacters.
-IFS=' ' read -ra inputs_array <<< "${GHA_ZIZMOR_INPUTS}"
+# - ${GHA_ZIZMOR_INPUTS} is tokenized via xargs into a bash array so that
+#   quoted arguments are handled correctly while preventing shell metacharacter
+#   injection (semicolons, pipes, backticks, $(...), etc. are passed as literals).
+inputs_array=()
+if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
+    while IFS= read -r -d '' t; do inputs_array+=("${t}"); done \
+        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
+fi
 
 docker run \
     --rm \
