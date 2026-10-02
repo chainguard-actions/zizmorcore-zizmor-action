@@ -94,12 +94,11 @@ echo "::endgroup::"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is a whitespace-separated list of inputs that
-#   we tokenize safely using xargs (quote-aware) into an array, so that
-#   glob expansion and other shell manipulation cannot occur on
-#   attacker-controlled data.
+# - ${GHA_ZIZMOR_INPUTS} is tokenized via xargs into an array so that
+#   it can expand according to shell word-splitting rules (honoring quotes)
+#   without allowing shell metacharacter injection.
 zizmor_inputs=()
-if [ -n "${GHA_ZIZMOR_INPUTS}" ]; then
+if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
     while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \
         < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
 fi

@@ -16,12 +16,11 @@ Action **zizmorcore--zizmor-action/v0.6.4** was hardened automatically. 1 findin
 
 ### script-injection (severity: high)
 
-Rule (b) violation: In action.sh, the shell variable `${GHA_ZIZMOR_INPUTS}` is intentionally left unquoted in the `docker run` command (accompanied by a `# shellcheck disable=SC2086` comment). This variable is populated from `inputs.inputs` — a user-controlled composite action input — via `env: GHA_ZIZMOR_INPUTS: ${{ inputs.inputs }}` in action.yml. While placing it after `--` prevents flag injection, the unquoted expansion still allows the shell to perform word-splitting and glob expansion on attacker-controlled data. The correct safe form would be to use `eval` with proper quoting, `xargs`, or the guarded `${GHA_ZIZMOR_INPUTS:+"$GHA_ZIZMOR_INPUTS"}` pattern. Offending line: `    ${GHA_ZIZMOR_INPUTS} \`
+Sub-rule (b) violation: `${GHA_ZIZMOR_INPUTS}` is expanded unquoted inside the `docker run` shell command in action.sh. This env var is sourced from `${{ inputs.inputs }}` (user-controlled). Although it is placed after `--` to prevent flag injection, the unquoted shell expansion still allows the shell to interpret metacharacters (e.g., `$(...)`, backticks, semicolons, glob characters) embedded in the value before passing arguments to docker. The offending line is: `    ${GHA_ZIZMOR_INPUTS} \`
 
 Locations:
 
-- `action.sh:97`
-- `action.yml:86`
+- `action.sh:117`
 
 ## Iteration Notes
 
@@ -31,5 +30,5 @@ Locations:
 
 **Notes:**
 
-Fixed the script-injection vulnerability in action.sh at line 97. The unquoted `${GHA_ZIZMOR_INPUTS}` expansion (which allowed glob expansion and other shell manipulation on attacker-controlled data from `inputs.inputs`) was replaced with a safe xargs-based tokenization into a bash array. The fix uses `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` piped through a NUL-delimited read loop to populate a `zizmor_inputs` array, which is then expanded as `"${zizmor_inputs[@]}"` in the docker run command. This preserves the intended quote-aware word-splitting behavior while preventing glob expansion and shell injection. The `# shellcheck disable=SC2086` comment was also removed as it is no longer needed.
+Fixed the unquoted `${GHA_ZIZMOR_INPUTS}` expansion in action.sh (line 117). Replaced the unquoted shell expansion (which allowed metacharacter injection) with a safe xargs-based tokenization into a bash array. The `GHA_ZIZMOR_INPUTS` value (sourced from `inputs.inputs`) is now tokenized via `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` into a `zizmor_inputs` array, which is then expanded as `"${zizmor_inputs[@]}"`. This preserves the intended word-splitting behavior (honoring quotes in the input) while preventing shell metacharacter injection. A guard `[[ -n "${GHA_ZIZMOR_INPUTS}" ]]` prevents xargs from emitting a spurious empty argument when the input is empty.
 
