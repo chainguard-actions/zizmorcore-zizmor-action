@@ -126,7 +126,7 @@ runs:
         GHA_ZIZMOR_FAIL_ON_NO_INPUTS: ${{ inputs.fail-on-no-inputs }}
       shell: bash
     - name: Upload SARIF file to GitHub Advanced Security
-      uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+      uses: chainguard-actions/github-codeql-action/upload-sarif@bea92ba5f7cd3d0283d285feeedbdc0a768ed31a # v4.36.2
       if: ${{ inputs.advanced-security == 'true' }}
       with:
         sarif_file: ${{ steps.run-zizmor.outputs.sarif-file }}
