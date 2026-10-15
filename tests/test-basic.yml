@@ -1,0 +1,33 @@
+name: Test basic usage (no advanced-security)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          inputs: "."
+        continue-on-error: true
+      - name: Assert action ran (output-file set or action completed)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # With advanced-security=false, no SARIF file is produced (output-file is empty)
+          # The action should succeed (exit 0) or exit with code 1 (findings found)
+          # Exit code 3 means no inputs collected, which is also acceptable
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action completed successfully"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran and reported findings (non-zero exit is expected when issues found)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

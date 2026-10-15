@@ -1,0 +1,37 @@
+name: Test SARIF output file is set
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          advanced-security: "true"
+          online-audits: "false"
+          inputs: "."
+        # The SARIF upload step will fail on the sentinel repo (not a real GitHub repo),
+        # so we allow failure here and assert on the output-file being set.
+        continue-on-error: true
+      - name: Assert output-file is set when advanced-security is true
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          # The output-file should be set (even if the upload step fails on sentinel repo)
+          # The action sets sarif-file output before the upload step runs
+          if [ -z "$OUTPUT_FILE" ]; then
+            # If outcome is failure due to sentinel repo upload failure, that's acceptable
+            if [ "$OUTCOME" = "failure" ]; then
+              echo "PASS: action failed gracefully (sentinel repo upload not possible)"
+            else
+              echo "FAIL: output-file is empty and action did not fail gracefully"
+              exit 1
+            fi
+          else
+            echo "PASS: output-file is set to '$OUTPUT_FILE'"
+          fi

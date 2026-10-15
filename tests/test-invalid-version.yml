@@ -1,0 +1,29 @@
+name: Test invalid version fails gracefully
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          version: "not-a-version"
+          inputs: "."
+        continue-on-error: true
+      - name: Assert action fails on invalid version format
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action.sh validates the version format with a regex.
+          # An invalid version like "not-a-version" should cause the action to fail.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed on invalid version format"
+          else
+            echo "FAIL: expected action to fail with invalid version, but got '$OUTCOME'"
+            exit 1
+          fi

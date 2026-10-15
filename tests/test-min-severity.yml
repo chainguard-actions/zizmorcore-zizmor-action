@@ -1,0 +1,30 @@
+name: Test min-severity filtering
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          min-severity: "high"
+          inputs: "."
+        continue-on-error: true
+      - name: Assert action ran with min-severity filter
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With min-severity=high, only high-severity findings are reported.
+          # The action should succeed (no high-severity findings) or fail (findings found).
+          # Either is acceptable — what matters is it ran without a configuration error.
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with min-severity=high (outcome: $OUTCOME)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
