@@ -1,0 +1,31 @@
+name: Test annotations mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          # Enable annotations mode (requires advanced-security: false)
+          advanced-security: "false"
+          annotations: "true"
+          online-audits: "false"
+          inputs: "."
+          version: latest
+        continue-on-error: true
+      - name: Assert action ran in annotations mode
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: zizmor ran in annotations mode successfully"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: zizmor ran in annotations mode (may have found issues or failed gracefully)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

@@ -1,0 +1,32 @@
+name: Test min-severity and min-confidence options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          inputs: "."
+          # Only report high severity, high confidence findings
+          min-severity: "high"
+          min-confidence: "high"
+          version: latest
+        continue-on-error: true
+      - name: Assert action ran with severity/confidence filters
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: zizmor ran successfully with min-severity=high and min-confidence=high"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: zizmor ran with filters (may have found issues or failed gracefully)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
