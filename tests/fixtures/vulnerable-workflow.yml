@@ -1,0 +1,11 @@
+name: vulnerable
+on:
+  issues:
+permissions: {}
+jobs:
+  vuln:
+    name: vuln
+    runs-on: ubuntu-latest
+    steps:
+      - name: inject
+        run: echo "${{ github.event.issue.title }}"

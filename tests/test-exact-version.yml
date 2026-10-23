@@ -1,0 +1,39 @@
+name: Test exact version pin
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Ensure pip is available
+        run: |
+          if ! python3 -m pip --version >/dev/null 2>&1; then
+            (sudo apt-get update && sudo apt-get install -y python3-pip) || \
+              (apt-get update && apt-get install -y python3-pip)
+          fi
+          python3 -m pip --version
+      - id: action
+        uses: .
+        with:
+          inputs: tests/fixtures/clean-workflow.yml
+          version: v1.31.1
+          advanced-security: "false"
+          online-audits: "false"
+          color: "false"
+          min-severity: high
+      - name: Assert exact version was installed
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          ls "$RUNNER_TEMP/zizmor-wheel/unpacked" || true
+          if [ ! -d "$RUNNER_TEMP/zizmor-wheel/unpacked/zizmor-1.31.1.data" ]; then
+            echo "FAIL: expected zizmor 1.31.1 wheel to be unpacked"
+            exit 1
+          fi
+          echo "PASS"

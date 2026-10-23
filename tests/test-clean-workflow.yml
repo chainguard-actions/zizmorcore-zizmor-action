@@ -1,0 +1,44 @@
+name: Test clean workflow passes
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Ensure pip is available
+        run: |
+          if ! python3 -m pip --version >/dev/null 2>&1; then
+            (sudo apt-get update && sudo apt-get install -y python3-pip) || \
+              (apt-get update && apt-get install -y python3-pip)
+          fi
+          python3 -m pip --version
+      - id: action
+        uses: .
+        with:
+          inputs: tests/fixtures/clean-workflow.yml
+          advanced-security: "false"
+          online-audits: "false"
+          color: "false"
+          min-severity: high
+      - name: Assert success and no SARIF output
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: '$OUTPUT_FILE'"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ -n "$OUTPUT_FILE" ]; then
+            echo "FAIL: output-file should be empty when advanced-security is false"
+            exit 1
+          fi
+          if [ ! -f "$RUNNER_TEMP/zizmor" ]; then
+            echo "FAIL: expected zizmor output at $RUNNER_TEMP/zizmor"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/zizmor"
+          echo "PASS"
