@@ -6,19 +6,19 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 ## Versions
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.2) | [`71321a2`](https://github.com/zizmorcore/zizmor-action/commit/71321a20a9ded102f6e9ce5718a2fcec2c4f70d8) |
-| v0.5.3 | [`v0.5.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.3) | [`b1d7e1f`](https://github.com/zizmorcore/zizmor-action/commit/b1d7e1fb5de872772f31590499237e7cce841e8e) |
-| v0.5.6 | [`v0.5.6`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.6) | [`5f14fd0`](https://github.com/zizmorcore/zizmor-action/commit/5f14fd08f7cf1cb1609c1e344975f152c7ee938d) |
-| v0.5.7 | [`v0.5.7`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.7) | [`192e21d`](https://github.com/zizmorcore/zizmor-action/commit/192e21d79ab29983730a13d1382995c2307fbcaa) |
-| v0.6.1 | [`v0.6.1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.1) | [`6fc4b00`](https://github.com/zizmorcore/zizmor-action/commit/6fc4b006235f201fdab3722e17240ab420d580e5) |
-| v0.6.2 | [`v0.6.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.2) | [`3dc1ecc`](https://github.com/zizmorcore/zizmor-action/commit/3dc1ecc9bcb9e94e9b2c709687979e1298497054) |
-| v0.6.3 | [`v0.6.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.3) | [`70fb788`](https://github.com/zizmorcore/zizmor-action/commit/70fb788f84895a7701f5643d103d587e460b5c99) |
-| v0.6.4 | [`v0.6.4`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.4) | [`cc914d7`](https://github.com/zizmorcore/zizmor-action/commit/cc914d7f3750a2d13d75c7f184a1060aa0e9d482) |
-| v0.7.0 | [`v0.7.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.7.0) | [`f9597c8`](https://github.com/zizmorcore/zizmor-action/commit/f9597c869b2e67095f9b527070297a13a6efe928) |
-| v0.7.1 | [`v0.7.1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.7.1) | [`85b2b9f`](https://github.com/zizmorcore/zizmor-action/commit/85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e) |
-| v0.8.0 | [`v0.8.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.8.0) | [`53290ba`](https://github.com/zizmorcore/zizmor-action/commit/53290badfa369cb0bf7ad16342cb62c2fa47ac7b) |
+| Version | Tag | Upstream commit | Hardening report |
+|---------|-----|-----------------|------------------|
+| v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.2) | [`71321a2`](https://github.com/zizmorcore/zizmor-action/commit/71321a20a9ded102f6e9ce5718a2fcec2c4f70d8) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.5.2/HARDENING.md) |
+| v0.5.3 | [`v0.5.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.3) | [`b1d7e1f`](https://github.com/zizmorcore/zizmor-action/commit/b1d7e1fb5de872772f31590499237e7cce841e8e) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.5.3/HARDENING.md) |
+| v0.5.6 | [`v0.5.6`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.6) | [`5f14fd0`](https://github.com/zizmorcore/zizmor-action/commit/5f14fd08f7cf1cb1609c1e344975f152c7ee938d) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.5.6/HARDENING.md) |
+| v0.5.7 | [`v0.5.7`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.7) | [`192e21d`](https://github.com/zizmorcore/zizmor-action/commit/192e21d79ab29983730a13d1382995c2307fbcaa) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.5.7/HARDENING.md) |
+| v0.6.1 | [`v0.6.1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.1) | [`6fc4b00`](https://github.com/zizmorcore/zizmor-action/commit/6fc4b006235f201fdab3722e17240ab420d580e5) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.6.1/HARDENING.md) |
+| v0.6.2 | [`v0.6.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.2) | [`3dc1ecc`](https://github.com/zizmorcore/zizmor-action/commit/3dc1ecc9bcb9e94e9b2c709687979e1298497054) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.6.2/HARDENING.md) |
+| v0.6.3 | [`v0.6.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.3) | [`70fb788`](https://github.com/zizmorcore/zizmor-action/commit/70fb788f84895a7701f5643d103d587e460b5c99) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.6.3/HARDENING.md) |
+| v0.6.4 | [`v0.6.4`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.6.4) | [`cc914d7`](https://github.com/zizmorcore/zizmor-action/commit/cc914d7f3750a2d13d75c7f184a1060aa0e9d482) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.6.4/HARDENING.md) |
+| v0.7.0 | [`v0.7.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.7.0) | [`f9597c8`](https://github.com/zizmorcore/zizmor-action/commit/f9597c869b2e67095f9b527070297a13a6efe928) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.7.0/HARDENING.md) |
+| v0.7.1 | [`v0.7.1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.7.1) | [`85b2b9f`](https://github.com/zizmorcore/zizmor-action/commit/85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.7.1/HARDENING.md) |
+| v0.8.0 | [`v0.8.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.8.0) | [`53290ba`](https://github.com/zizmorcore/zizmor-action/commit/53290badfa369cb0bf7ad16342cb62c2fa47ac7b) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.8.0/HARDENING.md) |
 
 ## Privacy
 
