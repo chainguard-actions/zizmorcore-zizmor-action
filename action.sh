@@ -120,22 +120,17 @@ chmod +x "${zizmor}"
 #   correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is a whitespace-separated list of inputs. We
-#   tokenize it with xargs to safely split it into an array without
-#   allowing shell metacharacter interpretation (globs, command
-#   substitution, backticks, etc.).
+# - ${GHA_ZIZMOR_INPUTS} is intentionally not quoted, so that
+#   it can expand according to the shell's word-splitting rules.
+#   However, we put it after `--` so that it can't be interpreted
+#   as one or more flags.
 cd "${GITHUB_WORKSPACE}"
 
-zizmor_inputs=()
-if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
-    while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \
-        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs -r printf '%s\0')
-fi
-
+# shellcheck disable=SC2086
 GH_TOKEN="${GHA_ZIZMOR_TOKEN}" "${zizmor}" \
     "${arguments[@]}" \
     -- \
-    "${zizmor_inputs[@]}" \
+    ${GHA_ZIZMOR_INPUTS} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"
