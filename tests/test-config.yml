@@ -1,0 +1,55 @@
+name: Test custom config file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create clean workflow and zizmor config
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/zizmor-config-fixture"
+          cat > "$GITHUB_WORKSPACE/zizmor-config-fixture/clean.yml" <<'EOF'
+          name: clean
+          on: push
+          permissions: {}
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - run: echo hello
+          EOF
+          cat > "$GITHUB_WORKSPACE/zizmor-config-fixture/zizmor.yml" <<'EOF'
+          rules:
+            artipacked:
+              ignore:
+                - clean.yml
+          EOF
+          cat "$GITHUB_WORKSPACE/zizmor-config-fixture/zizmor.yml"
+      - id: action
+        uses: .
+        with:
+          advanced-security: "false"
+          online-audits: "false"
+          color: "false"
+          config: zizmor-config-fixture/zizmor.yml
+          inputs: zizmor-config-fixture/clean.yml
+      - name: Assert action succeeded with custom config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          SARIF: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $SARIF"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ -n "$SARIF" ]; then
+            echo "FAIL: output-file should be empty when advanced-security=false"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Cleanup
+        if: always()
+        run: rm -rf "$GITHUB_WORKSPACE/zizmor-config-fixture"
