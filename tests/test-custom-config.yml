@@ -1,0 +1,59 @@
+name: Test custom config file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create clean workflow and zizmor config
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/zizmor-config-test"
+          cat > "$GITHUB_WORKSPACE/zizmor-config-test/clean.yml" <<'EOF'
+          name: clean
+          on: push
+          permissions: {}
+          jobs:
+            hello:
+              name: hello
+              runs-on: ubuntu-latest
+              steps:
+                - name: say hi
+                  run: echo hi
+          EOF
+          cat > "$GITHUB_WORKSPACE/zizmor-config-test/zizmor.yml" <<'EOF'
+          rules:
+            template-injection:
+              ignore:
+                - nonexistent-workflow.yml
+          EOF
+          cat "$GITHUB_WORKSPACE/zizmor-config-test/zizmor.yml"
+      - id: action
+        uses: .
+        with:
+          inputs: "zizmor-config-test/clean.yml"
+          config: "zizmor-config-test/zizmor.yml"
+          advanced-security: "false"
+          online-audits: "false"
+          min-severity: "high"
+          color: "false"
+        continue-on-error: true
+      - name: Assert zizmor ran successfully with custom config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "output-file: $OUTPUT_FILE"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected zizmor to succeed with a valid custom config on a clean workflow"
+            exit 1
+          fi
+          if [ -n "$OUTPUT_FILE" ]; then
+            echo "FAIL: output-file should be empty when advanced-security is false"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Cleanup
+        if: always()
+        run: rm -rf "$GITHUB_WORKSPACE/zizmor-config-test"

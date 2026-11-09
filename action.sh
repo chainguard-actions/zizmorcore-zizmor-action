@@ -94,15 +94,12 @@ echo "::endgroup::"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is tokenized via xargs into an array so that
-#   it can expand according to shell word-splitting rules (honoring quotes)
-#   without allowing shell metacharacter injection.
-zizmor_inputs=()
-if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
-    while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \
-        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
-fi
-
+# - ${GHA_ZIZMOR_INPUTS} is intentionally not quoted, so that
+#   it can expand according to the shell's word-splitting rules.
+#   However, we put it after `--` so that it can't be interpreted
+#   as one or more flags.
+#
+# shellcheck disable=SC2086
 docker run \
     --rm \
     --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
@@ -111,7 +108,7 @@ docker run \
     "${image}" \
     "${arguments[@]}" \
     -- \
-    "${zizmor_inputs[@]}" \
+    ${GHA_ZIZMOR_INPUTS} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"
