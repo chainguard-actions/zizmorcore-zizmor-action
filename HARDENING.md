@@ -16,11 +16,11 @@ Action **zizmorcore--zizmor-action/v0.5.3** was hardened automatically. 1 findin
 
 ### script-injection (severity: high)
 
-Rule (b) violation: `${GHA_ZIZMOR_INPUTS}` is intentionally left unquoted in the `docker run` command in action.sh (line ~97). This variable holds the value of `inputs.inputs`, which is a user-controlled input passed via the `GHA_ZIZMOR_INPUTS` env var. The unquoted expansion allows the shell to perform word-splitting and glob expansion on the attacker-controlled value. Although the value is placed after `--` (preventing flag injection into docker), the unquoted shell variable expansion of untrusted data is still a script-injection risk per rule (b). The fix is to use a proper array or quoted expansion: `"${GHA_ZIZMOR_INPUTS}"` or pass inputs as an array.
+Rule (b) violation in action.sh, the script run by the composite step in action.yml (`"${GITHUB_ACTION_PATH}/action.sh"`). The workflow-controlled env var GHA_ZIZMOR_INPUTS (from `${{ inputs.inputs }}`) is expanded without quotes straight into the `docker run` argument list: `    ${GHA_ZIZMOR_INPUTS} \`. It sits after `--`, so it can't be read as flags, and it doesn't run `;`, `|` or `$(...)`. But it still splits on whitespace and expands globs. It is not the exempt array-assignment form (`NAME=($VAR)` with `# shellcheck disable=SC2086`). Fix: split it into an array first, e.g. `# shellcheck disable=SC2086` then `zizmor_inputs=(${GHA_ZIZMOR_INPUTS})`, and pass `"${zizmor_inputs[@]}"` to docker run.
 
 Locations:
 
-- `action.sh:97`
+- `action.sh:106`
 
 ## Iteration Notes
 
@@ -30,5 +30,5 @@ Locations:
 
 **Notes:**
 
-Replaced the unquoted `${GHA_ZIZMOR_INPUTS}` expansion in action.sh (line ~97) with a proper xargs-based tokenization into a bash array (`zizmor_inputs`). The fix uses `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` piped through a NUL-delimited `while IFS= read -r -d '' t` loop to safely tokenize the whitespace-separated list input with quote-awareness. The array is then expanded as `"${zizmor_inputs[@]}"` in the docker run command, ensuring each token is a separate properly-quoted argument. A guard `if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]` prevents xargs from emitting an empty argument when the input is empty.
+Fixed the script-injection finding in action.sh. Untested. Before the `docker run` call, the script now sets `zizmor_inputs=(${GHA_ZIZMOR_INPUTS})` under the existing `# shellcheck disable=SC2086`. This splits on whitespace and expands globs the same way upstream's unquoted variable did. After `--`, the array is passed as `${zizmor_inputs[@]+"${zizmor_inputs[@]}"}`. This form keeps an empty input from erroring under `set -u` on older bash (macOS runners ship 3.2), and an empty input adds no argument at all.
 

@@ -1,4 +1,4 @@
-name: Test custom config file input
+name: Test custom config file
 on:
   workflow_dispatch:
 jobs:
@@ -6,10 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Install mock docker
+      - name: Install recording mock docker
         run: |
           mkdir -p "$HOME/.local/bin"
-          cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-success.sh" "$HOME/.local/bin/docker"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/mock-docker-record-args.sh" "$HOME/.local/bin/docker"
           chmod +x "$HOME/.local/bin/docker"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - id: action
@@ -17,17 +17,22 @@ jobs:
         with:
           advanced-security: "false"
           online-audits: "false"
+          config: "tests/fixtures/zizmor.yml"
           inputs: "."
           version: "1.24.1"
-          config: "${{ github.workspace }}/tests/fixtures/zizmor.yml"
-        continue-on-error: true
-      - name: Assert action ran with custom config
+      - name: Assert --config was passed to zizmor
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "skipped" ]; then
-            echo "FAIL: action was skipped unexpectedly"
+          echo "recorded args:"
+          cat /tmp/mock-docker-args.txt || { echo "FAIL: mock docker was not invoked"; exit 1; }
+          if ! grep -qx -- "--config=tests/fixtures/zizmor.yml" /tmp/mock-docker-args.txt; then
+            echo "FAIL: expected --config=tests/fixtures/zizmor.yml in zizmor arguments"
             exit 1
           fi
-          echo "PASS: action ran with custom config (outcome=$OUTCOME)"
+          if ! grep -qx -- "--no-online-audits" /tmp/mock-docker-args.txt; then
+            echo "FAIL: expected --no-online-audits in zizmor arguments"
+            exit 1
+          fi
+          echo "PASS"

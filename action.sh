@@ -89,15 +89,13 @@ image="ghcr.io/zizmorcore/zizmor:${normalized_version}@${digest}"
 #   like '.' resolve correctly.
 # - We pass the GitHub token as an environment variable so that zizmor
 #   can run online audits/perform online collection if requested.
-# - ${GHA_ZIZMOR_INPUTS} is a whitespace-separated list of inputs; we
-#   tokenize it with xargs into an array so that each token is a separate
-#   argument while still honoring quotes inside the value.
-zizmor_inputs=()
-if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]; then
-    while IFS= read -r -d '' t; do zizmor_inputs+=("$t"); done \
-        < <(printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0')
-fi
-
+# - ${GHA_ZIZMOR_INPUTS} is intentionally not quoted, so that
+#   it can expand according to the shell's word-splitting rules.
+#   However, we put it after `--` so that it can't be interpreted
+#   as one or more flags.
+#
+# shellcheck disable=SC2086
+zizmor_inputs=(${GHA_ZIZMOR_INPUTS})   # same split and glob as upstream's unquoted expansion
 docker run \
     --rm \
     --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
@@ -106,7 +104,7 @@ docker run \
     "${image}" \
     "${arguments[@]}" \
     -- \
-    "${zizmor_inputs[@]}" \
+    ${zizmor_inputs[@]+"${zizmor_inputs[@]}"} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"

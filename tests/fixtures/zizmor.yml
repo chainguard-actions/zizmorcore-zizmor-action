@@ -1,3 +1,5 @@
-# Minimal zizmor configuration for testing the config input
 rules:
-  {}
+  unpinned-uses:
+    config:
+      policies:
+        "*": hash-pin
