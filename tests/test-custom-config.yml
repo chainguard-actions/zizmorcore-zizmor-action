@@ -1,4 +1,4 @@
-name: Test custom config input
+name: Test custom config file
 on:
   workflow_dispatch:
 jobs:
@@ -7,28 +7,44 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Run zizmor with a custom config file
+      - name: Write a custom zizmor config into the workspace
+        run: |
+          cat > "$GITHUB_WORKSPACE/zizmor-test-config.yml" <<'EOF'
+          rules:
+            unpinned-uses:
+              ignore:
+                - ci.yml
+          EOF
+          cat "$GITHUB_WORKSPACE/zizmor-test-config.yml"
+
+      - name: Run zizmor with a custom config
         id: action
         uses: .
         with:
           inputs: "."
+          config: "zizmor-test-config.yml"
           advanced-security: "false"
           annotations: "false"
           online-audits: "false"
           persona: "regular"
           version: "latest"
-          config: "${{ github.workspace }}/hardened/tests/fixtures/zizmor-config/zizmor.yml"
         continue-on-error: true
 
-      - name: Assert action ran with custom config (not skipped)
+      - name: Assert action ran with custom config
         env:
           OUTCOME: ${{ steps.action.outcome }}
+          OUTPUT_FILE: ${{ steps.action.outputs.output-file }}
         run: |
           echo "outcome: $OUTCOME"
-          # zizmor exits 0 (no findings) or 1 (findings found) — both are valid runs
-          # A skipped outcome would indicate the action was never invoked
+          echo "output-file: $OUTPUT_FILE"
+          # zizmor exits 0 (no findings) or non-zero (findings) — both are valid runs
           if [ "$OUTCOME" = "skipped" ]; then
             echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          # advanced-security is false, so no SARIF output should be set
+          if [ -n "$OUTPUT_FILE" ]; then
+            echo "FAIL: output-file should be empty when advanced-security is false"
             exit 1
           fi
           echo "PASS: action ran with custom config (outcome=$OUTCOME)"

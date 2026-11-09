@@ -1,12 +1,15 @@
 name: zizmor-action
-description: "Run zizmor from GitHub Actions \U0001F308"
+description: Run zizmor from GitHub Actions 🌈
+
 branding:
   icon: "shield"
   color: "blue"
+
 outputs:
   output-file:
     description: Filepath to static analysis results in SARIF format"
     value: ${{ steps.run-zizmor.outputs.sarif-file }}
+
 inputs:
   inputs:
     description: |
@@ -96,6 +99,7 @@ inputs:
       will always fail on no inputs.
     required: false
     default: "true"
+
 runs:
   using: composite
   steps:
@@ -135,6 +139,7 @@ runs:
         GHA_ZIZMOR_CONFIG: ${{ inputs.config }}
         GHA_ZIZMOR_FAIL_ON_NO_INPUTS: ${{ inputs.fail-on-no-inputs }}
       shell: bash
+
     - name: Upload SARIF file to GitHub Advanced Security
       uses: chainguard-actions/github-codeql-action/upload-sarif@c1a4db5aaee42e0b0931b5d7320709c1e336e384 # v4.37.1
       if: ${{ inputs.advanced-security == 'true' }}
