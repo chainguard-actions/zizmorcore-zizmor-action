@@ -1,0 +1,60 @@
+name: Test custom config file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a clean workflow and a zizmor config inside the workspace.
+      # The workspace is mounted at /workspace in the zizmor container, so
+      # relative paths resolve against the workspace root.
+      - name: Create config and input fixtures
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.zizmor-config-test"
+          cat > "$GITHUB_WORKSPACE/.zizmor-config-test/zizmor.yml" <<'EOF'
+          rules:
+            unpinned-uses:
+              disable: true
+            excessive-permissions:
+              disable: true
+            artipacked:
+              disable: true
+            template-injection:
+              disable: true
+          EOF
+          cat > "$GITHUB_WORKSPACE/.zizmor-config-test/clean.yml" <<'EOF'
+          name: clean
+          on:
+            workflow_dispatch:
+          permissions: {}
+          jobs:
+            hello:
+              runs-on: ubuntu-latest
+              steps:
+                - name: hello
+                  run: echo hello
+          EOF
+          cat "$GITHUB_WORKSPACE/.zizmor-config-test/zizmor.yml"
+
+      - id: action
+        uses: .
+        with:
+          config: .zizmor-config-test/zizmor.yml
+          inputs: .zizmor-config-test/clean.yml
+          advanced-security: "false"
+          online-audits: "false"
+          color: "false"
+          version: "1.30.0"
+
+      - name: Assert action succeeded with custom config
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success with custom config"
+            exit 1
+          fi
+          echo "PASS"
