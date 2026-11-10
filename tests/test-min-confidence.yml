@@ -13,21 +13,19 @@ jobs:
           inputs: "."
           advanced-security: "false"
           online-audits: "false"
-          persona: "regular"
           min-confidence: "high"
-          version: "latest"
-          token: ${{ github.token }}
+          color: "false"
       - name: Assert action ran with min-confidence filter
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # With min-confidence=high, zizmor should run and either find high-confidence
-          # issues (exit 1) or find none (exit 0). Both are valid outcomes.
+          # zizmor exits 0 when nothing at/above high confidence is found, and
+          # non-zero when findings exist. Both mean the flag was accepted and ran.
           if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: zizmor ran with min-confidence=high and found no high-confidence issues"
+            echo "PASS: zizmor ran with min-confidence=high and found no issues"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: zizmor ran with min-confidence=high and found high-confidence issues"
+            echo "PASS: zizmor ran with min-confidence=high and reported findings"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1
