@@ -16,11 +16,11 @@ Action **zizmorcore--zizmor-action/v0.5.6** was hardened automatically. 1 findin
 
 ### script-injection (severity: high)
 
-Rule (b) violation: In action.sh, the env var `${GHA_ZIZMOR_INPUTS}` — which holds the value of `inputs.inputs` from the calling workflow — is intentionally left unquoted in the `docker run` command (`${GHA_ZIZMOR_INPUTS} \`). This allows the shell to perform word-splitting and glob expansion on attacker-controlled content before passing arguments to docker. While the `--` separator prevents docker from interpreting the values as flags, it does not prevent shell-level metacharacter processing (e.g., glob patterns like `*` expanding to local filenames, or whitespace-separated paths being split). The value should be quoted (`"${GHA_ZIZMOR_INPUTS}"`) or handled via an array to prevent unintended shell expansion of untrusted input.
+Rule (b): action.sh expands the workflow-controlled env var GHA_ZIZMOR_INPUTS (from `inputs.inputs`) unquoted, as a direct argument to `docker run`: line `    ${GHA_ZIZMOR_INPUTS} \`. There is a '# shellcheck disable=SC2086' above it, but the exception only covers an unquoted expansion inside an array assignment (NAME=($VAR) / NAME=(${VAR})). Here the expansion goes straight into the command's arguments. Fix: split it into an array first, `# shellcheck disable=SC2086` then `inputs_arr=(${GHA_ZIZMOR_INPUTS})`, and pass `"${inputs_arr[@]}"` after `--`.
 
 Locations:
 
-- `action.sh:88`
+- `action.sh:106`
 
 ## Iteration Notes
 
@@ -30,5 +30,5 @@ Locations:
 
 **Notes:**
 
-In action.sh, replaced the unquoted `${GHA_ZIZMOR_INPUTS}` expansion (which allowed glob expansion and shell metacharacter processing on attacker-controlled content) with a safe xargs-based tokenization into a bash array. The pattern uses `printf '%s' "${GHA_ZIZMOR_INPUTS}" | xargs printf '%s\0'` piped through a NUL-delimited read loop to populate `zizmor_inputs=()`, then expands it as `"${zizmor_inputs[@]}"` in the docker run command. This preserves quote-aware word-splitting (honoring single/double quotes and backslashes) while preventing glob expansion, and is guarded with `if [[ -n "${GHA_ZIZMOR_INPUTS}" ]]` to avoid emitting an empty token when the input is empty.
+In action.sh, GHA_ZIZMOR_INPUTS is now split into inputs_arr=(${GHA_ZIZMOR_INPUTS}) under the shellcheck SC2086 disable. That splits on whitespace and expands globs exactly as upstream's unquoted expansion did. The array is passed after '--' as ${inputs_arr[@]+"${inputs_arr[@]}"}. This form is "${inputs_arr[@]}" plus a guard: older bash running with set -u errors when it expands an empty array, and the guard prevents that.
 
