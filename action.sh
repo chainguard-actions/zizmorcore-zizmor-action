@@ -129,11 +129,14 @@ chmod +x "${zizmor}"
 #   as one or more flags.
 cd "${GITHUB_WORKSPACE}"
 
-# shellcheck disable=SC2086
+# Same whitespace split and glob as upstream's unquoted ${GHA_ZIZMOR_INPUTS}.
+# shellcheck disable=SC2086,SC2206
+zizmor_inputs=(${GHA_ZIZMOR_INPUTS})
+
 GH_TOKEN="${GHA_ZIZMOR_TOKEN}" "${zizmor}" \
     "${arguments[@]}" \
     -- \
-    ${GHA_ZIZMOR_INPUTS} \
+    ${zizmor_inputs[@]+"${zizmor_inputs[@]}"} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"
