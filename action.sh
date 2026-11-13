@@ -129,11 +129,15 @@ chmod +x "${zizmor}"
 #   as one or more flags.
 cd "${GITHUB_WORKSPACE}"
 
-# shellcheck disable=SC2086
+# Same word-splitting and globbing as upstream's unquoted expansion.
+# shellcheck disable=SC2206
+zizmor_inputs=(${GHA_ZIZMOR_INPUTS})
+
+# The ${arr[@]+...} guard keeps an empty list working under `set -u` on bash < 4.4.
 GH_TOKEN="${GHA_ZIZMOR_TOKEN}" "${zizmor}" \
     "${arguments[@]}" \
     -- \
-    ${GHA_ZIZMOR_INPUTS} \
+    ${zizmor_inputs[@]+"${zizmor_inputs[@]}"} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"
