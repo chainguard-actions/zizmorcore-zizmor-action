@@ -4,9 +4,8 @@
   "version": "v0.7.1",
   "commit_sha": "85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e",
   "url": "https://github.com/zizmorcore/zizmor-action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2",
-  "dependency_fingerprint": "sha256:8e8f9c9b40dad1277301392907260016b4c8d53fe80f4a66d78f52d9ba5897dd"
+  "harden_agent_version": "2"
 }

@@ -126,11 +126,16 @@ chmod +x "${zizmor}"
 #   as one or more flags.
 cd "${GITHUB_WORKSPACE}"
 
-# shellcheck disable=SC2086
+# Same whitespace split and globbing as upstream's unquoted expansion.
+# shellcheck disable=SC2206
+zizmor_inputs=(${GHA_ZIZMOR_INPUTS})
+
+# The ${x[@]+...} form avoids an unbound-variable error under `set -u` on
+# bash 3.2 (macOS) when the array is empty.
 GH_TOKEN="${GHA_ZIZMOR_TOKEN}" "${zizmor}" \
     "${arguments[@]}" \
     -- \
-    ${GHA_ZIZMOR_INPUTS} \
+    ${zizmor_inputs[@]+"${zizmor_inputs[@]}"} \
         | tee "${output}"
 
 exitcode="${PIPESTATUS[0]}"
