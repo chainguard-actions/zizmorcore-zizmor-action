@@ -1,6 +1,11 @@
 {
   "owner": "zizmorcore",
   "repo": "zizmor-action",
-  "version": "",
-  "url": "https://github.com/zizmorcore/zizmor-action"
+  "version": "v0.9.2",
+  "commit_sha": "1b4550e929643b8b26a62303c6bd64814271a4f1",
+  "url": "https://github.com/zizmorcore/zizmor-action",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
+  "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
+  "test_agent_version": "2",
+  "harden_agent_version": "2"
 }
