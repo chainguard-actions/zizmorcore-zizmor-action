@@ -21,6 +21,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v0.8.0 | [`v0.8.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.8.0) | [`53290ba`](https://github.com/zizmorcore/zizmor-action/commit/53290badfa369cb0bf7ad16342cb62c2fa47ac7b) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.8.0/HARDENING.md) |
 | v0.8.1 | [`v0.8.1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.8.1) | [`45d7276`](https://github.com/zizmorcore/zizmor-action/commit/45d7276c9ca790aabd705e31ca99c6185c3e76dd) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.8.1/HARDENING.md) |
 | v0.9.0 | [`v0.9.0`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.9.0) | [`bd12b49`](https://github.com/zizmorcore/zizmor-action/commit/bd12b495c90993a4301c73398142281a61499af3) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.9.0/HARDENING.md) |
+| v0.9.2 | [`v0.9.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.9.2) | [`1b4550e`](https://github.com/zizmorcore/zizmor-action/commit/1b4550e929643b8b26a62303c6bd64814271a4f1) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.9.2/HARDENING.md) |
 
 ## Privacy
 
