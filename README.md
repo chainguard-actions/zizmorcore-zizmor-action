@@ -8,6 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit | Hardening report |
 |---------|-----|-----------------|------------------|
+| v0.10.0-rc1 | [`v0.10.0-rc1`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.10.0-rc1) | [`7bb00a7`](https://github.com/zizmorcore/zizmor-action/commit/7bb00a7818c4d515db0e8288a84e3d9d643647d0) | [`HARDENING.md`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/blob/v0.10.0-rc1/HARDENING.md) |
 | v0.5.2 | [`v0.5.2`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.2) | [`71321a2`](https://github.com/zizmorcore/zizmor-action/commit/71321a20a9ded102f6e9ce5718a2fcec2c4f70d8) | — |
 | v0.5.3 | [`v0.5.3`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.3) | [`b1d7e1f`](https://github.com/zizmorcore/zizmor-action/commit/b1d7e1fb5de872772f31590499237e7cce841e8e) | — |
 | v0.5.6 | [`v0.5.6`](https://github.com/chainguard-actions/zizmorcore-zizmor-action/tree/v0.5.6) | [`5f14fd0`](https://github.com/zizmorcore/zizmor-action/commit/5f14fd08f7cf1cb1609c1e344975f152c7ee938d) | — |
